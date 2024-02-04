@@ -1,0 +1,902 @@
+---
+title: "Student Input Survey Analysis - Data Finalized on January 26, 2024"
+author: "Prepared by SAC Student Delegates \nWith High School SGA Input"
+output: html_document
+---
+
+```{r, echo = TRUE}
+knitr::opts_chunk$set(tidy = TRUE, tidy.opts=list(width.cutoff=60))
+
+require(corrplot)
+require(dplyr)
+require(ggplot2)
+require(RColorBrewer) 
+require(stringr)
+
+data <- read.csv("finalsurveydata.csv", sep = ",", head = TRUE)
+
+data <- data %>%
+  mutate(grade_num = case_when(grade == "5th" ~ 5, grade == "6th" ~ 6, grade == "7th" ~ 7, grade == "8th" ~ 8, grade == "9th" ~ 9, grade == "10th" ~ 10, grade == "11th" ~ 11, grade == "12th" ~ 12))
+```
+
+# Bar Plot of Respondent Grade
+```{r, echo = TRUE}
+grade_freq_table <- table(data$grade_num)
+barplot(grade_freq_table, 
+        main = "Bar Plot of Respondent Grade, \nn = 667", 
+        xlab = "Grade", 
+        ylab = "Count", 
+        col = brewer.pal(length(grade_freq_table), "Pastel1"), 
+        border = F, 
+        ylim = c(0, max(grade_freq_table) + 15))
+text(barplot(grade_freq_table, plot = FALSE), grade_freq_table, labels = grade_freq_table, pos = 3, col = "black", cex = 0.75)
+```
+
+# The school year is going really well for me.
+```{r, echo = TRUE}
+year_going_well <- data$going_well
+year_going_well <- as.factor(year_going_well)
+
+ggplot(data, aes(x = factor(grade_num), fill = factor(year_going_well))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: The school year \nis going really well for me.", subtitle = "n = 667", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# The new Bell Schedule with the 7 period A/B days is working out well for me.
+```{r, echo = TRUE}
+ab_works <- data$ab_works
+ab_works <- as.factor(ab_works)
+
+ggplot(data, aes(x = factor(grade_num), fill = factor(ab_works))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: The new Bell Schedule with \n the 7 period A/B days is working out well for me.", subtitle = "n = 667", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# I really enjoy the SEL activities on WEDNESDAYS during advisory.
+```{r, echo = TRUE}
+filtered_data <- data %>% filter(!is.na(like_sel))
+like_sel <- filtered_data$like_sel
+like_sel <- as.factor(like_sel)
+
+ggplot(filtered_data, aes(x = factor(grade_num), fill = factor(like_sel))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I really enjoy the \nSEL activities on WEDNESDAYS during advisory.", subtitle = "n = 656 (Optional Question)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# I like the time at which I eat lunch.
+```{r, echo = TRUE}
+like_lunchpd <- data$like_lunchpd
+like_lunchpd <- as.factor(like_lunchpd)
+
+ggplot(data, aes(x = factor(grade_num), fill = factor(like_lunchpd))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I like the time at which I eat lunch.", subtitle = "n = 667", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# I am often hungry during the school day because of when my lunch is scheduled.
+```{r, echo = TRUE}
+hungry <- data$hungry
+hungry <- as.factor(hungry)
+
+ggplot(data, aes(x = factor(grade_num), fill = factor(hungry))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I am often hungry during the school \nday because of when my lunch is scheduled.", subtitle = "n = 667", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# I prefer the time at which I ate lunch last year.
+```{r, echo = TRUE}
+pref_old_lunch <- data$pref_old_lunch
+pref_old_lunch <- as.factor(pref_old_lunch)
+
+ggplot(data, aes(x = factor(grade_num), fill = factor(pref_old_lunch))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I prefer the time \nat which I ate lunch last year.", subtitle = "n = 667", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# In Middle School, some rostered Specials periods like Music, Art, PE/Gym, Health, and Computers have been replaced with an Extended Advisory everyday. I feel like this is a positive change for students.  
+```{r, echo = TRUE}
+spectral_colors <- brewer.pal(7, "Spectral")
+seven_spectral_colors <- setNames(spectral_colors, c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree", "I am a middle school student\nand I do not know", "I am a high school student and\nI do not know"))
+
+ms_sch_change <- data$In.Middle.School..some.rostered.Specials.periods.like.Music..Art..PE.Gym..Health..and.Computers.have.been.replaced.with.an.Extended.Advisory.everyday..I.feel.like.this.is.a.positive.change.for.students.
+ms_sch_change <- as.data.frame(table(ms_sch_change))
+names(ms_sch_change) <- c("Category", "Count")
+
+ms_sch_change$Percentage <- ms_sch_change$Count / sum(ms_sch_change$Count) * 100
+ms_sch_change$Category <- str_wrap(ms_sch_change$Category, width = 30)
+ms_sch_change$Category <- factor(ms_sch_change$Category, levels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree", "I am a middle school student\nand I do not know", "I am a high school student and\nI do not know"))
+
+pie <- ggplot(data = ms_sch_change, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_manual(values = seven_spectral_colors) +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 4, fontface = "bold") +
+  labs(title = "Survey Question: In Middle School, some rostered Specials \nperiods like Music, Art, PE/Gym, Health, and Computers \nhave been replaced with an Extended Advisory everyday. \nI feel like this is a positive change for students.", subtitle = "n = 667", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+print(pie)
+
+
+ms_sch_change_filtered <- ms_sch_change %>% filter(!grepl("I am a middle school student\nand I do not know", Category), !grepl("I am a high school student and\nI do not know", Category))
+ms_sch_change_filtered$Percentage <- ms_sch_change_filtered$Count / sum(ms_sch_change_filtered$Count) * 100
+
+pie <- ggplot(data = ms_sch_change_filtered, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_manual(values = seven_spectral_colors) +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 4, fontface = "bold") +
+  labs(title = "Survey Question: In Middle School, some rostered Specials \nperiods like Music, Art, PE/Gym, Health, and Computers \nhave been replaced with an Extended Advisory everyday. \nI feel like this is a positive change for students.", subtitle = "n = 443, excluding 'I don't Know' options", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+print(pie)
+```
+
+# I am often late or worried that I will be late for 1st period as classes start right at 8:15.
+```{r, echo = TRUE}
+late <- data$I.am.often.late.or.worried.that.I.will.be.late.for.1st.period.as.classes.start.right.at.8.15.
+late <- as.factor(late)
+
+ggplot(data, aes(x = factor(grade_num), fill = factor(late))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I am often late or worried that I \nwill be late for 1st period as classes start right at 8:15.", subtitle = "n = 667", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# I can hear the morning announcements all the time.
+```{r, echo = TRUE}
+announce <- data$I.can.hear.the.morning.announcements.all.the.time.
+announce <- as.factor(announce)
+
+ggplot(data, aes(x = factor(grade_num), fill = factor(announce))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I can hear the morning \nannouncements all the time.", subtitle = "n = 667", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# A short morning advisory would help me get settled at school before a day full of classes.
+```{r, echo = TRUE}
+short_adv_prep <- data$A.short.morning.advisory.would.help.me.get.settled.at.school.before.a.day.full.of.classes.
+short_adv_prep <- as.factor(short_adv_prep)
+
+ggplot(data, aes(x = factor(grade_num), fill = factor(short_adv_prep))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: A short morning advisory would help \nme get settled at school before a day full of classes.", subtitle = "n = 667", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# In your opinion, which is the preferred schedule for Middle School: (All Respondents)
+```{r, echo = TRUE}
+ms_pref_sch <- as.data.frame(table(data$pref_ms_sch))
+names(ms_pref_sch) <- c("Category", "Count")
+
+ms_pref_sch$Percentage <- ms_pref_sch$Count / sum(ms_pref_sch$Count) * 100
+ms_pref_sch$Category <- str_wrap(ms_pref_sch$Category, width = 40)
+
+pie <- ggplot(data = ms_pref_sch, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_brewer(palette = "Spectral") +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 4, fontface = "bold") +
+  labs(title = "Survey Question: In your opinion, which is \n the preferred schedule for Middle School:", subtitle = "n = 667", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# In your opinion, which is the preferred schedule for Middle School: (MS Only)
+```{r, echo = TRUE}
+datafiltered <- data %>%
+  filter(grade_num %in% c(5, 6, 7, 8))
+
+ms_pref_sch_filtered <- as.data.frame(table(datafiltered$pref_ms_sch))
+names(ms_pref_sch_filtered) <- c("Category", "Count")
+
+ms_pref_sch_filtered$Percentage <- ms_pref_sch_filtered$Count / sum(ms_pref_sch_filtered$Count) * 100
+ms_pref_sch_filtered$Category <- str_wrap(ms_pref_sch_filtered$Category, width = 40)
+
+pie <- ggplot(data = ms_pref_sch_filtered, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_brewer(palette = "Spectral") +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 4, fontface = "bold") +
+  labs(title = "Survey Question: In your opinion, which is \nthe preferred schedule for Middle School:", subtitle = paste0("n = ", sum(ms_pref_sch_filtered$Count), " (MS Students Only)"), fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# In your opinion, which is the preferred schedule for Middle School: (HS Only)
+```{r, echo = TRUE}
+datafiltered <- data %>%
+  filter(grade_num %in% c(9, 10, 11, 12))
+
+ms_pref_sch_filtered <- as.data.frame(table(datafiltered$pref_ms_sch))
+names(ms_pref_sch_filtered) <- c("Category", "Count")
+
+ms_pref_sch_filtered$Percentage <- ms_pref_sch_filtered$Count / sum(ms_pref_sch_filtered$Count) * 100
+ms_pref_sch_filtered$Category <- str_wrap(ms_pref_sch_filtered$Category, width = 40)
+
+pie <- ggplot(data = ms_pref_sch_filtered, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_brewer(palette = "Spectral") +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 4, fontface = "bold") +
+  labs(title = "Survey Question: In your opinion, which is \nthe preferred schedule for Middle School:", subtitle = paste0("n = ", sum(ms_pref_sch_filtered$Count), " (HS Students Only)"), fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# In your opinion, which is the preferred schedule for High School: (All Respondents)
+```{r, echo = TRUE}
+hs_pref_sch <- as.data.frame(table(data$pref_hs_sch))
+names(hs_pref_sch) <- c("Category", "Count")
+
+hs_pref_sch$Percentage <- hs_pref_sch$Count / sum(hs_pref_sch$Count) * 100
+hs_pref_sch$Category <- str_wrap(hs_pref_sch$Category, width = 40)
+
+pie <- ggplot(data = hs_pref_sch, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_brewer(palette = "Spectral") +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 4, fontface = "bold") +
+  labs(title = "Survey Question: In your opinion, which is \nthe preferred schedule for High School:", subtitle = "n = 667", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# In your opinion, which is the preferred schedule for High School: (MS Only) 
+```{r, echo = TRUE}
+datafiltered <- data %>%
+  filter(grade_num %in% c(5, 6, 7, 8))
+
+hs_pref_sch_filtered <- as.data.frame(table(datafiltered$pref_hs_sch))
+names(hs_pref_sch_filtered) <- c("Category", "Count")
+
+hs_pref_sch_filtered$Percentage <- hs_pref_sch_filtered$Count / sum(hs_pref_sch_filtered$Count) * 100
+hs_pref_sch_filtered$Category <- str_wrap(hs_pref_sch_filtered$Category, width = 40)
+
+pie <- ggplot(data = hs_pref_sch_filtered, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_brewer(palette = "Spectral") +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 3, fontface = "bold") +
+  labs(title = "Survey Question: In your opinion, which is \nthe preferred schedule for High School:", subtitle = "n = 337 (MS Students Only)", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# In your opinion, which is the preferred schedule for High School: (HS Only)
+```{r, echo = TRUE}
+datafiltered <- data %>%
+  filter(grade_num %in% c(9, 10, 11, 12))
+
+hs_pref_sch_filtered <- as.data.frame(table(datafiltered$pref_hs_sch))
+names(hs_pref_sch_filtered) <- c("Category", "Count")
+
+hs_pref_sch_filtered$Percentage <- hs_pref_sch_filtered$Count / sum(hs_pref_sch_filtered$Count) * 100
+hs_pref_sch_filtered$Category <- str_wrap(hs_pref_sch_filtered$Category, width = 40)
+
+pie <- ggplot(data = hs_pref_sch_filtered, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_brewer(palette = "Spectral") +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 3, fontface = "bold") +
+  labs(title = "Survey Question: In your opinion, which is \nthe preferred schedule for High School:", subtitle = "n = 330 (HS Students Only)", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# Do you have a preference between the 7 period A/B schedule and 8 period regular schedule?
+```{r, echo = TRUE}
+data <- data %>%
+  mutate(sch_pref_nums = case_when(sch_pref == "I like the 7 period A/B schedule we are using this year" ~ 1, sch_pref == "I like the 8 period regular schedule we used previously" ~ 2, sch_pref == "I don't really notice a difference" ~ 3, sch_pref == "I don't have a preference" ~ 4, sch_pref == "I am not sure" ~ 5, sch_pref == "I wasn't at Masterman last year" ~ 6))
+
+sch_pref_nums <- data$sch_pref_nums
+sch_pref_nums <- as.factor(sch_pref_nums)
+
+ggplot(data, aes(x = factor(grade_num), fill = factor(sch_pref_nums))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: Do you have a preference between \nthe 7 period A/B schedule and 8 period regular schedule?", subtitle = "n = 667", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("dodgerblue1", "mediumpurple1", "hotpink1", "tomato1", "darkorange", "goldenrod1"), labels = c("I like the 7 period A/B schedule \nwe are using this year", "I like the 8 period regular schedule \nwe used previously (with Pathways \nor a flexible slot as 8th period)", "I don't really notice a difference", "I don't have a preference", "I am not sure", "I wasn't at Masterman last year")) +
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5),legend.text = element_text(size = 7))
+```
+
+# I prefer this year's 7 period A/B schedule to last year's Regular 8 period schedule. (All Respondents)
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(pref_ab != 0)
+
+pref_ab <- data_filtered$pref_ab
+pref_ab <- as.factor(pref_ab)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(pref_ab))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I prefer this year's 7 period A/B \n schedule to last year's Regular 8 period schedule.", subtitle = "n = 533 (Students attending Masterman for 2+ Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# I prefer this year's 7 period A/B schedule to last year's Regular 8 period schedule. (2-3 years)
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(pref_AB_two != 0)
+
+pref_AB_two <- data_filtered$pref_AB_two
+pref_AB_two <- as.factor(pref_AB_two)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(pref_AB_two))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I prefer this year's 7 period A/B \n schedule to last year's Regular 8 period schedule.", subtitle = "n = 244 (Students attending Masterman for 2-3 Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# I prefer this year's 7 period A/B schedule to last year's Regular 8 period schedule. (4+ years)
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(pref_AB_four != 0)
+
+pref_AB_four <- data_filtered$pref_AB_four
+pref_AB_four <- as.factor(pref_AB_four)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(pref_AB_four))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I prefer this year's 7 period A/B \n schedule to last year's Regular 8 period schedule.", subtitle = "n = 289 (Students attending Masterman for 4+ Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# The impact of this year's 7 period A/B schedule on my mental health and overall Masterman experience has been positive. (All Respondents)
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(mh_effect != 0)
+
+mh_effect <- data_filtered$mh_effect
+mh_effect <- as.factor(mh_effect)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(mh_effect))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: The impact of this year's 7 period A/B schedule on \nmy mental health and overall Masterman experience has been positive.", subtitle = " n = 533 (Students attending Masterman for 2+ Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# The impact of this year's 7 period A/B schedule on my mental health and overall Masterman experience has been positive. (2-3 years)
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(mh_effect_two != 0)
+
+mh_effect_two <- data_filtered$mh_effect_two
+mh_effect_two <- as.factor(mh_effect_two)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(mh_effect_two))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: The impact of this year's 7 period A/B schedule on \nmy mental health and overall Masterman experience has been positive.", subtitle = "n = 244 (Students attending Masterman for 2-3 Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# The impact of this year's 7 period A/B schedule on my mental health and overall Masterman experience has been positive. (4+ years)
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(mh_effect_four != 0)
+
+mh_effect_four <- data_filtered$mh_effect_four
+mh_effect_four <- as.factor(mh_effect_four)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(mh_effect_four))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: The impact of this year's 7 period A/B schedule on \nmy mental health and overall Masterman experience has been positive.", subtitle = " n = 289 (Students attending Masterman for 4+ Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# Masterman should offer at least 2 languages in High School.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(two_lang != 0)
+
+two_lang <- data_filtered$two_lang
+two_lang <- as.factor(two_lang)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(two_lang))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: Masterman should offer \nat least 2 languages in High School.", subtitle = " n = 289 (Students attending Masterman for 4+ Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# Access to 4 years of foreign language in High School is essential for college admissions to competitive colleges.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(lang_college != 0)
+
+lang_college <- data_filtered$lang_college
+lang_college <- as.factor(lang_college)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(lang_college))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: Access to 4 years of foreign language in High \nSchool is essential for college admissions to competitive colleges.", subtitle = " n = 289 (Students attending Masterman for 4+ Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# A 5 year language course progression starting with Language 1 in 8th grade through an AP elective in senior year is ideal.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(five_year_ideal != 0)
+
+five_year_ideal <- data_filtered$five_year_ideal
+five_year_ideal <- as.factor(five_year_ideal)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(five_year_ideal))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: A 5 year language course progression starting with \nLanguage 1 in 8th grade through an AP elective in senior year is ideal.", subtitle = " n = 289 (Students attending Masterman for 4+ Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# A 4 year language course progression starting with Language 1 in 9th grade, through an AP elective in senior year (skipping Language 4) is as desirable as a 5 year language progression.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(four_year_ideal != 0)
+
+four_year_ideal <- data_filtered$four_year_ideal
+four_year_ideal <- as.factor(four_year_ideal)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(four_year_ideal))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: A 4 year language course progression starting with \nLanguage 1 in 9th grade, through an AP elective in senior year (skipping \nLanguage 4) is as desirable as a 5 year language progression.", subtitle = " n = 289 (Students attending Masterman for 4+ Years)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# Masterman should bring back the access to an Accelerated Math Track, starting in 7th grade. 
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(Masterman.should.bring.back.the.access.to.an.Accelerated.Math.Track..starting.in.7th.grade. != 0) %>%
+  filter(grade_num != 6)
+
+acc_math <- data_filtered$Masterman.should.bring.back.the.access.to.an.Accelerated.Math.Track..starting.in.7th.grade.
+acc_math <- as.factor(acc_math)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(acc_math))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: Masterman should bring back the access \nto an Accelerated Math Track, starting in 7th grade. ", subtitle = " n = 248 (Students attending Masterman for 4+ Years, Self-Report)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# Masterman should continue to give students a chance to double up on Math courses, in 9th and/or 10th grade.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(Masterman.should.continue.to.give.students.a.chance.to.double.up.on.Math.courses..in.9th.and.or.10th.grade. != 0) %>%
+  filter(grade_num != 6)
+
+doubleup <- data_filtered$Masterman.should.continue.to.give.students.a.chance.to.double.up.on.Math.courses..in.9th.and.or.10th.grade.
+doubleup <- as.factor(doubleup)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(doubleup))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: Masterman should continue to give students \na chance to double up on Math courses, in 9th and/or 10th grade.", subtitle = " n = 257 (Students attending Masterman for 4+ Years, Self-Report)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# I am satisfied with my xth grade schedule of classes this year.
+```{r, echo = TRUE}
+data$combined_ms_schedule_satisfaction <- coalesce(data$I.am.satisfied.with.my.5th.grade.schedule.of.classes.this.year., data$I.am.satisfied.with.my.6th.grade.schedule.of.classes.this.year., data$I.am.satisfied.with.my.7th.grade.schedule.of.classes.this.year., data$I.am.satisfied.with.my.8th.grade.schedule.of.classes.this.year.)
+
+data_filtered <- data %>%
+  filter(combined_ms_schedule_satisfaction != 0)
+
+sch_satisf <- data_filtered$combined_ms_schedule_satisfaction
+sch_satisf <- as.factor(sch_satisf)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(sch_satisf))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I am satisfied with my xth \n grade schedule of classes this year.", subtitle = "n = 337 (MS Students)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+```{r, echo = TRUE}
+data$combined_ms_specials_satisfaction <- coalesce(data$I.am.satisfied.with.the.variety.of.Specials.I.have.in.5th.grade.this.year., data$I.am.satisfied.with.the.variety.of.Specials.I.have.in.6th.grade.this.year., data$I.am.satisfied.with.the.variety.of.Specials.I.have.in.7th.grade.this.year., data$I.am.satisfied.with.the.variety.of.Specials.I.have.this.year.)
+
+data_filtered <- data %>%
+  filter(combined_ms_specials_satisfaction != 0)
+
+spe_satisf <- data_filtered$combined_ms_specials_satisfaction
+spe_satisf <- as.factor(spe_satisf)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(spe_satisf))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: I am satisfied with the \nvariety of Specials I have this year.", subtitle = "n = 337 (MS Students)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+```{r, echo = TRUE}
+data$fifthprefoldnew1 <- data$Last.year..5th.graders.had.1.period.each.of.Art..Music..PE..Health..Computer.and.Guidance.every.week..Do.you.prefer.your.current.schedule.to.what.5th.graders.had.last.year.
+data <- data %>%
+  mutate(fifthprefoldnew2 = case_when(fifthprefoldnew1 == "I would have liked the old 5th grade schedule with multiple Specials every week" ~ 1, fifthprefoldnew1 == "I prefer this year's schedule with some Specials every other day" ~ 2, fifthprefoldnew1 == "I have no preference" ~ 3))
+
+data$sixthprefoldnew1 <- data$Last.year..6th.graders.had.2.periods.of.Art.and.Music....one.period.of.PE..Health..and.Guidance.every.week..Do.you.prefer.your.current.schedule.to.what.6th.graders.had.last.year.
+data <- data %>%
+  mutate(sixthprefoldnew2 = case_when(sixthprefoldnew1 == "I would have liked the old schedule with multiple Specials every week" ~ 1, sixthprefoldnew1 == "I prefer this year's schedule with less Specials every other day" ~ 2, sixthprefoldnew1 == "I have no preference" ~ 3))
+
+data$seventhprefoldnew1 <- data$Last.year..7th.graders.had.2.periods.a.week.of.Art..Music..and.PE....1.period.a.week.of.Computers..Health..and.Guidance.all.year..Do.you.prefer.the.current.schedule.to.what.7th.graders.had.last.year.
+data <- data %>%
+  mutate(seventhprefoldnew2 = case_when(seventhprefoldnew1 == "I would have liked the old 7th grade schedule with multiple Specials every week" ~ 1, seventhprefoldnew1 == "I prefer this year's 7th grade schedule with some Specials every other day" ~ 2, seventhprefoldnew1 == "I have no preference" ~ 3))
+
+data$eighthprefoldnew1 <- data$Last.year..8th.graders.had.2.periods.a.week.of.Art..Music..and.PE....1.period.a.week.of.Health.and.Guidance..Do.you.prefer.your.current.schedule.to.what.8th.graders.had.last.year.
+data <- data %>%
+  mutate(eighthprefoldnew2 = case_when(eighthprefoldnew1 == "I would have liked the old schedule with more Specials for 8th grade" ~ 1, eighthprefoldnew1 == "I prefer this year's schedule with one Special every other day and lunch time enrichment." ~ 2, eighthprefoldnew1 == "I have no preference" ~ 3))
+
+data$combined_ms_compare_thistolastyear <- coalesce(data$fifthprefoldnew2, data$sixthprefoldnew2, data$seventhprefoldnew2, data$eighthprefoldnew2)
+
+data_filtered <- data %>%
+  filter(combined_ms_compare_thistolastyear != 0)
+
+comp2yrms <- data_filtered$combined_ms_compare_thistolastyear
+comp2yrms <- as.factor(comp2yrms)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(comp2yrms))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: Do you prefer your current \nschedule to what xth graders had last year?", subtitle = "n = 337 (MS Students)", x = "Grade", y = "Percentage") +
+  scale_fill_brewer(name = " ", palette = "Set1", labels = c("I would have liked the old schedule", "I prefer this year's schedule", "I have no preference")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# If you use used or use Illustrative Mathematics, how well has the system worked for homework?
+```{r, echo = TRUE}
+data$illusmath <- ifelse(is.na(data$If.you.use.used.or.use.Illustrative.Mathematics..how.well.has.the.system.worked.for.homework.), data$If.you.use.used.or.use.Illustrative.Mathematics..how.well.has.the.system.worked.for.homework..1, data$If.you.use.used.or.use.Illustrative.Mathematics..how.well.has.the.system.worked.for.homework.)
+
+data_filtered <- data %>%
+  filter(illusmath != 0)
+
+illusmath <- data_filtered$illusmath
+illusmath <- as.factor(illusmath)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(illusmath))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: If you use used or use Illustrative \n Mathematics, how well has the system worked for homework?", subtitle = "n = 183 (Underclassmen)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Very Poorly", "Poorly", "Neutral", "Well", "Very Well")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# Last academic year, all juniors had access to Junior Seminar, which helped them research and prepare components of their college applications. Would you like to have this course reinstated for junior year?
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(Last.academic.year..all.juniors.had.access.to.Junior.Seminar..which.helped.them.research.and.prepare.components.of.their.college.applications..Would.you.like.to.have.this.course.reinstated.for.junior.year. != "")
+
+soph_want_jrsem <- as.data.frame(table(data_filtered$Last.academic.year..all.juniors.had.access.to.Junior.Seminar..which.helped.them.research.and.prepare.components.of.their.college.applications..Would.you.like.to.have.this.course.reinstated.for.junior.year.))
+names(soph_want_jrsem) <- c("Category", "Count")
+
+soph_want_jrsem$Percentage <- soph_want_jrsem$Count / sum(soph_want_jrsem$Count) * 100
+soph_want_jrsem$Category <- str_wrap(soph_want_jrsem$Category, width = 40)
+
+pie <- ggplot(data = soph_want_jrsem, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_manual(name = " ", values = c("indianred3", "snow2", "seagreen4"), labels = c("No", "Not sure", "Yes")) +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))),
+            position = position_stack(vjust = 0.5), size = 4, fontface = "bold") +
+  labs(title = "Survey Question: Last academic year, all juniors had \naccess to Junior Seminar, which helped them research \nand prepare components of their college applications. \nWould you like to have this course reinstated for junior year?", subtitle = "n = 66 (Sophomores)", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(),axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# I feel adequately prepared for the college admissions process.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(jrs_prep_college != 0, jrs_prep_college != "")
+
+jrs_prep_college <- as.data.frame(table(data_filtered$jrs_prep_college))
+names(jrs_prep_college) <- c("Category", "Count")
+
+jrs_prep_college$Percentage <- jrs_prep_college$Count / sum(jrs_prep_college$Count) * 100
+jrs_prep_college$Category <- factor(jrs_prep_college$Category, levels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
+unused_row <- data.frame(Category = "Strongly Agree", Count = 0, Percentage = 0)
+jrs_prep_college <- rbind(jrs_prep_college, unused_row)
+
+pie <- ggplot(data = jrs_prep_college, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_brewer(palette = "Spectral") +
+  geom_text(aes(label = ifelse(Percentage > 0, paste0(sprintf("%1.1f%%", Percentage)), "")), position = position_stack(vjust = 0.5), size = 3, fontface = "bold") +
+  labs(title = "Survey Question: I feel adequately prepared \nfor the college admissions process.", subtitle = "n = 75 (Juniors Only)", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# A year-round college and career preparatory course (Junior Seminar) would be a good use of my time in school.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(jr_sem_good_scool != 0, jr_sem_good_scool != "")
+
+jr_sem <- as.data.frame(table(data_filtered$jr_sem_good_scool))
+names(jr_sem) <- c("Category", "Count")
+
+jr_sem$Percentage <- jr_sem$Count / sum(jr_sem$Count) * 100
+jr_sem$Category <- factor(jr_sem$Category, levels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"))
+unused_row <- data.frame(Category = "Strongly Disagree", Count = 0, Percentage = 0)
+jr_sem <- rbind(jr_sem, unused_row)
+
+pie <- ggplot(data = jr_sem, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_brewer(palette = "Spectral") +
+  geom_text(aes(label = ifelse(Percentage > 0, paste0(sprintf("%1.1f%%", Percentage)), "")), position = position_stack(vjust = 0.5), size = 3, fontface = "bold") +
+  labs(title = "Survey Question: A year-round college and career preparatory \ncourse (Junior Seminar) would be a good use of my time in school.", subtitle = "n = 75 (Juniors Only)", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# What do you think about Forensics class?
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(forensics != 0)
+data_filtered$forensics <- factor(data_filtered$forensics, levels = 1:5, labels = c("Not at all useful", "Generally useless", "Neutral", "Generally useful", "Completely useful"))
+
+forensics <- as.data.frame(table(data_filtered$forensics))
+names(forensics) <- c("Category", "Count")
+forensics$Percentage <- forensics$Count / sum(forensics$Count) * 100
+
+pie <- ggplot(data = forensics, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_brewer(palette = "Spectral") +
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 3, fontface = "bold") +
+  labs(title = "Survey Question: What do you think about Forensics class?", subtitle = "n = 72 (Seniors Only)", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(),  plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# Do you think that the Class of 2025 and future classes should (or should have) take(n) Junior Seminar?
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(future_take_jrsem != 0, future_take_jrsem != "")
+
+future_take_jrsem <- as.data.frame(table(data_filtered$future_take_jrsem))
+names(future_take_jrsem) <- c("Category", "Count")
+
+future_take_jrsem$Percentage <- future_take_jrsem$Count / sum(future_take_jrsem$Count) * 100
+future_take_jrsem$Category <- factor(future_take_jrsem$Category, levels = c("Yes", "No", "Not sure"))
+
+pie <- ggplot(data = future_take_jrsem, aes(x = "", y = Count, fill = Category)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar(theta = "y") +
+  theme_void() +
+  scale_fill_manual(values = c("Yes" = "seagreen4", "No" = "indianred3", "Not sure" = "snow2")) + 
+  geom_text(aes(label = paste0(sprintf("%1.1f%%", Percentage))), position = position_stack(vjust = 0.5), size = 3, fontface = "bold") +
+  labs(title = "Survey Question: Do you think that the Class of 2025 and \nfuture classes should (or should have) take(n) Junior Seminar?", subtitle = "n = 72 (Seniors Only)", fill = "") + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.title.x = element_blank(), axis.title.y = element_blank(), axis.text.x = element_blank())
+
+print(pie)
+```
+
+# Our administrators (Dr. Payne, Ms. Lennon, Ms. Harrison) have been there when you wanted to speak with them.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(admin_avail != 0)
+
+data_filtered <- data_filtered %>%
+  mutate(admin_avail1 = case_when(admin_avail == "They were generally accessible" ~ 1, admin_avail == "They were sometimes accessible" ~ 2, admin_avail == "They were never accessible" ~ 3, admin_avail == "I have never tried to communicate directly with Dr. Payne, Ms. Lennon, or Ms. Harrison" ~ 4))
+data_filtered <- data_filtered %>% filter(!is.na(admin_avail1))
+
+admin_avail1 <- data_filtered$admin_avail1
+admin_avail1 <- as.factor(admin_avail1)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(admin_avail1))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: Our administrators (Dr. Payne, Ms. Lennon, \n Ms. Harrison) have been there when you wanted to speak with them.", subtitle = "n = 147 (Upperclassmen Only) \nNote: No respondent answered they were always accessible.", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("seagreen3", "palegreen", "indianred3", "snow2"), labels = c("They were generally accessible", "They were sometimes accessible", "They were never accessible", "I have never tried to communicate \ndirectly with Dr. Payne, Ms. \nLennon, or Ms. Harrison")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# Please indicate how accessible Mr. Gilken has been when you wanted to speak with him.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(gilk_avail != 0)
+data_filtered <- data_filtered %>%
+  mutate(gilk_avail1 = case_when(gilk_avail == "He was always accessible" ~ 1, gilk_avail == "He was generally accessible" ~ 2, gilk_avail == "He was sometimes accessible" ~ 3, gilk_avail == "He was never accessible" ~ 4, gilk_avail == "I have never tried to communicate directly with Mr. Gilken" ~ 5))
+data_filtered <- data_filtered %>% filter(!is.na(gilk_avail1))
+
+gilk_avail1 <- data_filtered$gilk_avail1
+gilk_avail1 <- as.factor(gilk_avail1)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(gilk_avail1))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: Please indicate how accessible Mr. Gilken \n has been when you wanted to speak with him.", subtitle = "n = 147 (Upperclassmen Only)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("seagreen4", "seagreen3", "palegreen", "indianred3", "snow2"), labels = c("He was always accessible", "He was generally accessible", "He was sometimes accessible", "He was never accessible.", "I have never tried to communicate \ndirectly with Mr. Gilken")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# Please indicate how accessible your counselor has been when you wanted to speak with them.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(couns_avail != 0)
+data_filtered <- data_filtered %>%
+  mutate(couns_avail1 = case_when(couns_avail == "They were always accessible" ~ 1, couns_avail == "They were generally accessible" ~ 2, couns_avail == "They were sometimes accessible" ~ 3, couns_avail == "They were never accessible" ~ 4, couns_avail == "I have never tried to communicate directly with my counselor" ~ 5))
+data_filtered <- data_filtered %>% filter(!is.na(couns_avail1))
+
+couns_avail1 <- data_filtered$couns_avail1
+couns_avail1 <- as.factor(couns_avail1)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(couns_avail1))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: Please indicate how accessible your counselor \nhas been when you wanted to speak with them.", subtitle = "n = 147 (Upperclassmen Only)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("seagreen4", "seagreen3", "palegreen", "indianred3", "snow2"), labels = c("They were always accessible", "They were generally accessible", "They were sometimes accessible", "They were never accessible", "I have never tried to communicate \ndirectly with my counselor")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# On a scale of 1-5, please indicate if you feel that students' input matter to our administration.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(voice_matters != 0)
+
+voice_matters <- data_filtered$voice_matters
+voice_matters <- as.factor(voice_matters)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(voice_matters))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: On a scale of 1-5, please indicate \n if you feel that students' input matter to our administration.", subtitle = "n = 543 (7-12th Grade)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("It does not matter", "It somewhat does not matter", "Neutral", "It somewhat does matter", "It does matter")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# On a scale of 1-5, please indicate if you feel that students' voices have been heard by our administration.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(voice_heard != 0)
+
+voice_heard <- data_filtered$voice_heard
+voice_heard <- as.factor(voice_heard)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(voice_heard))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: On a scale of 1-5, please indicate if you \n feel that students' voices have been heard by our administration.", subtitle = "n = 543 (7-12th Grade)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Not heard at all", "Slightly heard", "Somewhat heard", "Mostly heard", "Heard")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# On a scale of 1-5, please indicate your opinion of communication between students and our administration.
+```{r, echo = TRUE}
+data_filtered <- data %>%
+  filter(comm_rate != 0)
+
+comm_rate <- data_filtered$comm_rate
+comm_rate <- as.factor(comm_rate)
+
+ggplot(data_filtered, aes(x = factor(grade_num), fill = factor(comm_rate))) +
+  geom_bar(position = "fill") +
+  labs(title = "Survey Question: On a scale of 1-5, please indicate your \n opinion of communication between students and our administration.", subtitle = "n = 543 (7-12th Grade)", x = "Grade", y = "Percentage") +
+  scale_fill_manual(name = " ", values = c("indianred3", "indianred1", "snow2", "seagreen3", "seagreen4"), labels = c("Completely inadequate", "Somewhat inadequate", "Neutral", "Good", "Excellent")) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5))
+```
+
+# Other AP Courses
+```{r, echo = TRUE}
+apcourses <- read.csv("Extra AP Offerings Survey Question - Sheet2.csv", head = TRUE, sep = ",")
+apcourses <- as.data.frame(apcourses)
+
+color_vector <- rep(brewer.pal(11, "Spectral"), length.out = length(unique(apcourses$CLASS)))
+
+ggplot(data = apcourses, aes(x = apcourses$CLASS, y = apcourses$COUNT, fill = apcourses$CLASS)) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "Survey Question: If you could take another AP course that \nMasterman does NOT currently offer, which one would it be?", subtitle = "n = 131 (Upperclassmen Only, Self-Report) \nRespondents could select multiple options.", x = "Class", y = "Count") +
+  scale_fill_manual(values = color_vector) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.text.x = element_text(angle = 70, hjust = 1), legend.position = "none")
+
+
+apcourses_filtered <- apcourses %>% filter(CLASS != "Psychology")
+ggplot(data = apcourses_filtered, aes(x = CLASS, y = COUNT, fill = CLASS)) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "Survey Question: If you could take another AP course that \nMasterman does NOT currently offer, which one would it be?", subtitle = "n = 131 (Upperclassmen Only, Self-Report) \nRespondents could select multiple options.", x = "Class", y = "Count") +
+  scale_fill_manual(values = color_vector) + 
+  theme_minimal() +
+  theme(panel.grid = element_blank(), plot.background = element_rect(fill = "white", color = NA), plot.title = element_text(hjust = 0.5), plot.subtitle = element_text(hjust = 0.5), axis.text.x = element_text(angle = 70, hjust = 1), legend.position = "none")
+```
+
+# Numerics corrplot & additional analysis
+```{r, echo = TRUE}
+numerics <- select_if(data, is.numeric)
+numerics <- numerics[, !apply(is.na(numerics), 2, any)]
+numerics <- numerics[, !apply(numerics == "", 2, any)]
+numerics_cor <- cor(numerics, method = "pearson")
+colnames(numerics_cor) <- substr(colnames(numerics_cor), 1, 35)
+rownames(numerics_cor) <- substr(rownames(numerics_cor), 1, 35)
+corrplot(numerics_cor, method = "color", tl.cex = 0.3, addCoef.col = 1, number.cex = 0.3)
+
+table <- table(data$pref_ab, data$mh_effect)
+test <- chisq.test(table)
+print(test)
+test2 <- fisher.test(table, simulate.p.value = TRUE)
+print(test2)
+
+install.packages("vcd", repos = "https://cloud.r-project.org/")
+library(vcd)
+my_table <- table(data$pref_ab, data$mh_effect)
+assocstats(my_table)
+sqrt(chisq.test(my_table)$statistic/sum(my_table))
+```
